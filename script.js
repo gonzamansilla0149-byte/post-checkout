@@ -88,7 +88,7 @@ form.addEventListener("submit", async (e) => {
 
   console.log("Datos del formulario:", data);
 
-  successMessage.classList.remove("hidden");
+  window.location.href = "gracias.html";
 
   // más adelante:
   // await fetch("/api/shipping", {
