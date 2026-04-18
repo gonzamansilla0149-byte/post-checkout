@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Completar envío</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="container">
+    <div class="card">
+      <h1>Completar datos de envío</h1>
+      <p class="subtitle">
+        Por favor completá la información para continuar con tu compra.
+      </p>
+
+      <form id="shippingForm">
+        <div class="grid">
+          <div class="field">
+            <label for="firstName">Nombre</label>
+            <input type="text" id="firstName" name="firstName" />
+            <small class="error" id="error-firstName"></small>
+          </div>
+
+          <div class="field">
+            <label for="lastName">Apellido</label>
+            <input type="text" id="lastName" name="lastName" />
+            <small class="error" id="error-lastName"></small>
+          </div>
+
+          <div class="field">
+            <label for="dni">DNI</label>
+            <input type="text" id="dni" name="dni" />
+            <small class="error" id="error-dni"></small>
+          </div>
+
+          <div class="field">
+            <label for="phone">Teléfono</label>
+            <input type="text" id="phone" name="phone" />
+            <small class="error" id="error-phone"></small>
+          </div>
+
+          <div class="field full">
+            <label for="address">Dirección</label>
+            <input type="text" id="address" name="address" />
+            <small class="error" id="error-address"></small>
+          </div>
+
+          <div class="field">
+            <label for="apartment">Piso / Depto</label>
+            <input type="text" id="apartment" name="apartment" />
+          </div>
+
+          <div class="field">
+            <label for="city">Ciudad</label>
+            <input type="text" id="city" name="city" />
+            <small class="error" id="error-city"></small>
+          </div>
+
+          <div class="field">
+            <label for="province">Provincia</label>
+            <input type="text" id="province" name="province" />
+            <small class="error" id="error-province"></small>
+          </div>
+
+          <div class="field">
+            <label for="postalCode">Código postal</label>
+            <input type="text" id="postalCode" name="postalCode" />
+            <small class="error" id="error-postalCode"></small>
+          </div>
+
+          <div class="field full">
+            <label for="notes">Observaciones</label>
+            <textarea id="notes" name="notes" rows="4"></textarea>
+          </div>
+        </div>
+
+        <button type="submit" id="submitBtn">Continuar</button>
+      </form>
+
+      <p id="successMessage" class="success hidden">
+        Datos enviados correctamente.
+      </p>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
