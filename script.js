@@ -1,7 +1,12 @@
+const params = new URLSearchParams(window.location.search);
+const orderId = params.get("order_id");
+
 const form = document.getElementById("shippingForm");
 const successMessage = document.getElementById("successMessage");
 const billingOptions = document.querySelectorAll('input[name="billingOption"]');
 const billingFields = document.getElementById("billingFields");
+
+console.log("order_id:", orderId);
 
 function clearErrors() {
   const errorElements = document.querySelectorAll(".error");
@@ -36,6 +41,7 @@ function getFormData() {
   const billingOption = getSelectedBillingOption();
 
   return {
+    orderId,
     firstName: document.getElementById("firstName").value.trim(),
     lastName: document.getElementById("lastName").value.trim(),
     dni: document.getElementById("dni").value.trim(),
@@ -60,6 +66,11 @@ function getFormData() {
 
 function validate(data) {
   let isValid = true;
+
+  if (!data.orderId) {
+    alert("No se encontró el identificador del pedido.");
+    isValid = false;
+  }
 
   if (!data.firstName) {
     setError("firstName", "Ingresá tu nombre");
@@ -148,7 +159,7 @@ form.addEventListener("submit", async (e) => {
   successMessage.classList.remove("hidden");
 
   setTimeout(() => {
-    window.location.href = "gracias.html";
+    window.location.href = `gracias.html?order_id=${encodeURIComponent(orderId)}`;
   }, 500);
 
   // más adelante:
@@ -158,5 +169,5 @@ form.addEventListener("submit", async (e) => {
   //   body: JSON.stringify(data),
   // });
   //
-  // window.location.href = "gracias.html";
+  // window.location.href = `gracias.html?order_id=${encodeURIComponent(orderId)}`;
 });
