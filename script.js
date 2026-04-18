@@ -1,5 +1,7 @@
 const form = document.getElementById("shippingForm");
 const successMessage = document.getElementById("successMessage");
+const billingOptions = document.querySelectorAll('input[name="billingOption"]');
+const billingFields = document.getElementById("billingFields");
 
 function clearErrors() {
   const errorElements = document.querySelectorAll(".error");
@@ -15,17 +17,43 @@ function setError(field, message) {
   }
 }
 
+function getSelectedBillingOption() {
+  const selected = document.querySelector('input[name="billingOption"]:checked');
+  return selected ? selected.value : "same";
+}
+
+function toggleBillingFields() {
+  const billingOption = getSelectedBillingOption();
+
+  if (billingOption === "different") {
+    billingFields.classList.remove("hidden");
+  } else {
+    billingFields.classList.add("hidden");
+  }
+}
+
 function getFormData() {
+  const billingOption = getSelectedBillingOption();
+
   return {
     firstName: document.getElementById("firstName").value.trim(),
     lastName: document.getElementById("lastName").value.trim(),
     dni: document.getElementById("dni").value.trim(),
     phone: document.getElementById("phone").value.trim(),
+
     address: document.getElementById("address").value.trim(),
     apartment: document.getElementById("apartment").value.trim(),
     city: document.getElementById("city").value.trim(),
     province: document.getElementById("province").value.trim(),
     postalCode: document.getElementById("postalCode").value.trim(),
+
+    billingOption,
+    billingAddress: document.getElementById("billingAddress")?.value.trim() || "",
+    billingApartment: document.getElementById("billingApartment")?.value.trim() || "",
+    billingCity: document.getElementById("billingCity")?.value.trim() || "",
+    billingProvince: document.getElementById("billingProvince")?.value.trim() || "",
+    billingPostalCode: document.getElementById("billingPostalCode")?.value.trim() || "",
+
     notes: document.getElementById("notes").value.trim(),
   };
 }
@@ -73,11 +101,40 @@ function validate(data) {
     isValid = false;
   }
 
+  if (data.billingOption === "different") {
+    if (!data.billingAddress) {
+      alert("Ingresá la dirección de facturación");
+      isValid = false;
+    }
+
+    if (!data.billingCity) {
+      alert("Ingresá la ciudad de facturación");
+      isValid = false;
+    }
+
+    if (!data.billingProvince) {
+      alert("Ingresá la provincia de facturación");
+      isValid = false;
+    }
+
+    if (!data.billingPostalCode) {
+      alert("Ingresá el código postal de facturación");
+      isValid = false;
+    }
+  }
+
   return isValid;
 }
 
+billingOptions.forEach((option) => {
+  option.addEventListener("change", toggleBillingFields);
+});
+
+toggleBillingFields();
+
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
+
   clearErrors();
   successMessage.classList.add("hidden");
 
@@ -88,7 +145,11 @@ form.addEventListener("submit", async (e) => {
 
   console.log("Datos del formulario:", data);
 
-  window.location.href = "gracias.html";
+  successMessage.classList.remove("hidden");
+
+  setTimeout(() => {
+    window.location.href = "gracias.html";
+  }, 500);
 
   // más adelante:
   // await fetch("/api/shipping", {
@@ -97,5 +158,5 @@ form.addEventListener("submit", async (e) => {
   //   body: JSON.stringify(data),
   // });
   //
-  // window.location.href = "/gracias.html";
+  // window.location.href = "gracias.html";
 });
