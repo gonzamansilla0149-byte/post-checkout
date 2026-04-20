@@ -156,18 +156,28 @@ form.addEventListener("submit", async (e) => {
 
   console.log("Datos del formulario:", data);
 
+try {
+  const res = await fetch("https://TU-WORKER.com/shipping-completed", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  const result = await res.json();
+
+  if (!res.ok || !result.ok) {
+    throw new Error(result.error || "No se pudo enviar la información de envío");
+  }
+
   successMessage.classList.remove("hidden");
 
   setTimeout(() => {
     window.location.href = `gracias.html?order_id=${encodeURIComponent(orderId)}`;
   }, 500);
-
-  // más adelante:
-  // await fetch("/api/shipping", {
-  //   method: "POST",
-  //   headers: { "Content-Type": "application/json" },
-  //   body: JSON.stringify(data),
-  // });
-  //
-  // window.location.href = `gracias.html?order_id=${encodeURIComponent(orderId)}`;
+} catch (err) {
+  console.error("Error enviando datos de envío:", err);
+  alert("Hubo un problema al guardar los datos de envío. Probá de nuevo.");
+}
 });
