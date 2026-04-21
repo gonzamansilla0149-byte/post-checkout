@@ -157,7 +157,7 @@ form.addEventListener("submit", async (e) => {
   console.log("Datos del formulario:", data);
 
 try {
-  const res = await fetch("https://TU-WORKER.com/shipping-completed", {
+  const res = await fetch("https://paydangotools.gonzamansilla0149.workers.dev/shipping-completed", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
