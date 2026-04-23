@@ -176,7 +176,7 @@ try {
   successMessage.classList.remove("hidden");
 
   setTimeout(() => {
-    window.location.href = `gracias.html?order_id=${encodeURIComponent(orderId)}`;
+    window.location.href = `/gracias.html?order_id=${encodeURIComponent(orderId)}`;
   }, 500);
 } catch (err) {
   console.error("Error enviando datos de envío:", err);
