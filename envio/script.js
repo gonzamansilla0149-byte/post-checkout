@@ -47,11 +47,13 @@ function getFormData() {
     dni: document.getElementById("dni").value.trim(),
     phone: document.getElementById("phone").value.trim(),
 
-    address: document.getElementById("address").value.trim(),
-    apartment: document.getElementById("apartment").value.trim(),
+    address1: document.getElementById("address").value.trim(),
+    address2: document.getElementById("apartment").value.trim(),
     city: document.getElementById("city").value.trim(),
     province: document.getElementById("province").value.trim(),
-    postalCode: document.getElementById("postalCode").value.trim(),
+    zip: document.getElementById("postalCode").value.trim(),
+    country: "Argentina",
+    company: "",
 
     billingOption,
     billingAddress: document.getElementById("billingAddress")?.value.trim() || "",
@@ -92,10 +94,10 @@ function validate(data) {
     isValid = false;
   }
 
-  if (!data.address) {
-    setError("address", "Ingresá tu dirección");
-    isValid = false;
-  }
+if (!data.address1) {
+  setError("address", "Ingresá tu dirección");
+  isValid = false;
+}
 
   if (!data.city) {
     setError("city", "Ingresá tu ciudad");
@@ -107,10 +109,10 @@ function validate(data) {
     isValid = false;
   }
 
-  if (!data.postalCode) {
-    setError("postalCode", "Ingresá tu código postal");
-    isValid = false;
-  }
+if (!data.zip) {
+  setError("postalCode", "Ingresá tu código postal");
+  isValid = false;
+}
 
   if (data.billingOption === "different") {
     if (!data.billingAddress) {
