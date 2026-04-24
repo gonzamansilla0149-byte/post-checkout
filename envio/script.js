@@ -8,6 +8,26 @@ const billingFields = document.getElementById("billingFields");
 
 console.log("order_id:", orderId);
 
+async function redirectIfShippingAlreadyCompleted() {
+  if (!orderId) return;
+
+  try {
+    const res = await fetch(
+      `https://paydangotools.gonzamansilla0149.workers.dev/shipping-status?order_id=${encodeURIComponent(orderId)}`
+    );
+
+    const result = await res.json();
+
+    if (res.ok && result.ok && result.completed) {
+      window.location.href = `/gracias.html?order_id=${encodeURIComponent(orderId)}`;
+    }
+  } catch (err) {
+    console.error("No se pudo consultar el estado del envío:", err);
+  }
+}
+
+redirectIfShippingAlreadyCompleted();
+
 function clearErrors() {
   const errorElements = document.querySelectorAll(".error");
   errorElements.forEach((el) => {
@@ -169,10 +189,14 @@ try {
 
   const result = await res.json();
 
-  if (!res.ok || !result.ok) {
-    throw new Error(result.error || "No se pudo enviar la información de envío");
+if (!res.ok || !result.ok) {
+  if (result.alreadyCompleted) {
+    window.location.href = `/gracias.html?order_id=${encodeURIComponent(orderId)}`;
+    return;
   }
 
+  throw new Error(result.error || "No se pudo enviar la información de envío");
+}
   successMessage.classList.remove("hidden");
 
   setTimeout(() => {
