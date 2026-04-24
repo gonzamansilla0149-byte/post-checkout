@@ -1,5 +1,14 @@
 const params = new URLSearchParams(window.location.search);
-const orderId = params.get("order_id");
+let orderId = params.get("order_id");
+
+// 🔥 fallback desde MercadoPago
+if (!orderId) {
+  const externalRef = params.get("external_reference");
+
+  if (externalRef && externalRef.includes("DraftOrder")) {
+    orderId = externalRef;
+  }
+}
 
 const form = document.getElementById("shippingForm");
 const successMessage = document.getElementById("successMessage");
@@ -173,6 +182,35 @@ form.addEventListener("submit", async (e) => {
 
   const data = getFormData();
   const isValid = validate(data);
+
+  if (!isValid) return;
+
+let attempts = 0;
+let success = false;
+
+while (attempts < 3 && !success) {
+  attempts++;
+
+  const res = await fetch("https://paydangotools.gonzamansilla0149.workers.dev/shipping-completed", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  const result = await res.json();
+
+  if (res.ok && result.ok) {
+    success = true;
+    break;
+  }
+
+  await new Promise(r => setTimeout(r, 1500));
+}
+
+if (!success) {
+  alert("Tu pago se está procesando. Probá nuevamente en unos segundos.");
+  return;
+}
 
   if (!isValid) return;
 
