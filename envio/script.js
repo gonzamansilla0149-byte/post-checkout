@@ -1,13 +1,49 @@
 const params = new URLSearchParams(window.location.search);
 let orderId = params.get("order_id");
 
-// 🔥 fallback desde MercadoPago
+// 🔥 fallback MercadoPago (DraftOrder)
 if (!orderId) {
   const externalRef = params.get("external_reference");
 
   if (externalRef && externalRef.includes("DraftOrder")) {
     orderId = externalRef;
   }
+}
+
+async function waitForRealOrder() {
+  if (!orderId) return;
+
+  let attempts = 0;
+
+  while (attempts < 10) {
+    attempts++;
+
+    try {
+      const res = await fetch(
+        `https://paydangotools.gonzamansilla0149.workers.dev/shipping-status?order_id=${encodeURIComponent(orderId)}`
+      );
+
+      const result = await res.json();
+
+      // 🔥 YA ES ORDER REAL
+      if (res.ok && result.ok) {
+        return true;
+      }
+
+      // 🔥 SI SIGUE SIENDO DRAFT → esperar
+      if (res.status === 409) {
+        await new Promise(r => setTimeout(r, 1500));
+        continue;
+      }
+
+    } catch (err) {
+      console.error("Error esperando orden:", err);
+    }
+
+    await new Promise(r => setTimeout(r, 1500));
+  }
+
+  return false;
 }
 
 const form = document.getElementById("shippingForm");
@@ -35,7 +71,21 @@ async function redirectIfShippingAlreadyCompleted() {
   }
 }
 
-redirectIfShippingAlreadyCompleted();
+(async () => {
+  const ready = await waitForRealOrder();
+
+  if (!ready) {
+    document.body.innerHTML = `
+      <div style="padding:20px;text-align:center;">
+        <h2>Estamos procesando tu pago...</h2>
+        <p>Por favor esperá unos segundos y recargá la página.</p>
+      </div>
+    `;
+    return;
+  }
+
+  redirectIfShippingAlreadyCompleted();
+})();
 
 function clearErrors() {
   const errorElements = document.querySelectorAll(".error");
