@@ -231,60 +231,69 @@ form.addEventListener("submit", async (e) => {
   successMessage.classList.add("hidden");
 
   const data = getFormData();
-  const isValid = validate(data);
 
-  if (!isValid) return;
-
-let attempts = 0;
-let success = false;
-
-while (attempts < 3 && !success) {
-  attempts++;
-
-  const res = await fetch("https://paydangotools.gonzamansilla0149.workers.dev/shipping-completed", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-
-  const result = await res.json();
-
-  if (res.ok && result.ok) {
-    success = true;
-    break;
-  }
-
-  await new Promise(r => setTimeout(r, 1500));
-}
-
-if (!success) {
-  alert("Tu pago se está procesando. Probá nuevamente en unos segundos.");
-  return;
-}
-
-  if (!isValid) return;
+  if (!validate(data)) return;
 
   console.log("Datos del formulario:", data);
 
+  let lastResult = null;
+  let lastStatus = null;
 
+  try {
+    for (let attempts = 1; attempts <= 3; attempts++) {
+      const response = await fetch(
+        "https://paydangotools.gonzamansilla0149.workers.dev/shipping-completed",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        }
+      );
 
-  const result = await res.json();
+      lastStatus = response.status;
 
-if (!res.ok || !result.ok) {
-  if (result.alreadyCompleted) {
-    window.location.href = `/gracias.html?order_id=${encodeURIComponent(orderId)}`;
-    return;
+      try {
+        lastResult = await response.json();
+      } catch {
+        lastResult = {
+          ok: false,
+          error: "Respuesta inválida del servidor",
+        };
+      }
+
+      if (response.ok && lastResult.ok) {
+        successMessage.classList.remove("hidden");
+
+        setTimeout(() => {
+          window.location.href = `/gracias.html?order_id=${encodeURIComponent(orderId)}`;
+        }, 500);
+
+        return;
+      }
+
+      if (lastResult.alreadyCompleted) {
+        window.location.href = `/gracias.html?order_id=${encodeURIComponent(orderId)}`;
+        return;
+      }
+
+      if (lastStatus === 409) {
+        await new Promise((r) => setTimeout(r, 1500));
+        continue;
+      }
+
+      break;
+    }
+
+    throw new Error(
+      lastResult?.error ||
+        "No se pudo enviar la información de envío"
+    );
+  } catch (err) {
+    console.error("Error enviando datos de envío:", err);
+    alert(
+      lastStatus === 409
+        ? "Tu pago se está procesando. Probá nuevamente en unos segundos."
+        : "Hubo un problema al guardar los datos de envío. Probá de nuevo."
+    );
   }
-
-  throw new Error(result.error || "No se pudo enviar la información de envío");
-}
-  successMessage.classList.remove("hidden");
-
-  setTimeout(() => {
-    window.location.href = `/gracias.html?order_id=${encodeURIComponent(orderId)}`;
-  }, 500);
-} catch (err) {
-  console.error("Error enviando datos de envío:", err);
-  alert("Hubo un problema al guardar los datos de envío. Probá de nuevo.");
-}
 });
