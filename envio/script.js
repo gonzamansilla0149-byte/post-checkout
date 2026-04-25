@@ -11,11 +11,16 @@ if (!orderId) {
 }
 
 async function waitForRealOrder() {
-  if (!orderId) return;
+  if (!orderId) return false;
+
+  // Si por error llega un DraftOrder, no seguimos.
+  if (orderId.includes("/DraftOrder/")) {
+    return false;
+  }
 
   let attempts = 0;
 
-  while (attempts < 10) {
+  while (attempts < 6) {
     attempts++;
 
     try {
@@ -25,22 +30,14 @@ async function waitForRealOrder() {
 
       const result = await res.json();
 
-      // 🔥 YA ES ORDER REAL
       if (res.ok && result.ok) {
         return true;
       }
-
-      // 🔥 SI SIGUE SIENDO DRAFT → esperar
-      if (res.status === 409) {
-        await new Promise(r => setTimeout(r, 1500));
-        continue;
-      }
-
     } catch (err) {
       console.error("Error esperando orden:", err);
     }
 
-    await new Promise(r => setTimeout(r, 1500));
+    await new Promise((r) => setTimeout(r, 1000));
   }
 
   return false;
@@ -72,19 +69,19 @@ async function redirectIfShippingAlreadyCompleted() {
 }
 
 (async () => {
-  const ready = await waitForRealOrder();
-
-  if (!ready) {
-    document.body.innerHTML = `
-      <div style="padding:20px;text-align:center;">
-        <h2>Estamos procesando tu pago...</h2>
-        <p>Por favor esperá unos segundos y recargá la página.</p>
-      </div>
-    `;
+  if (!orderId) {
+    alert("No encontramos el pedido. Abrí el formulario desde el link recibido después del pago.");
     return;
   }
 
-  redirectIfShippingAlreadyCompleted();
+  const ready = await waitForRealOrder();
+
+  if (!ready) {
+    alert("Tu pago ya fue recibido, pero el pedido todavía se está terminando de confirmar. Esperá unos segundos y volvé a abrir el link.");
+    return;
+  }
+
+  await redirectIfShippingAlreadyCompleted();
 })();
 
 function clearErrors() {
