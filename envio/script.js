@@ -1,14 +1,6 @@
 const params = new URLSearchParams(window.location.search);
 let orderId = params.get("order_id");
 
-// 🔥 fallback MercadoPago (DraftOrder)
-if (!orderId) {
-  const externalRef = params.get("external_reference");
-
-  if (externalRef && externalRef.includes("DraftOrder")) {
-    orderId = externalRef;
-  }
-}
 
 async function waitForRealOrder() {
   if (!orderId) return false;
@@ -69,19 +61,36 @@ async function redirectIfShippingAlreadyCompleted() {
 }
 
 (async () => {
-  if (!orderId) {
-    alert("No encontramos el pedido. Abrí el formulario desde el link recibido después del pago.");
+  if (!orderId || orderId.includes("/DraftOrder/")) {
+    window.location.replace("https://dangotools.com");
     return;
   }
 
-  const ready = await waitForRealOrder();
+  try {
+    const res = await fetch(
+      `https://paydangotools.gonzamansilla0149.workers.dev/shipping-status?order_id=${encodeURIComponent(orderId)}`
+    );
 
-  if (!ready) {
-    alert("Tu pago ya fue recibido, pero el pedido todavía se está terminando de confirmar. Esperá unos segundos y volvé a abrir el link.");
-    return;
+    const result = await res.json();
+
+    // URL falsa / order inexistente / error Shopify
+    if (!res.ok || !result.ok) {
+      window.location.replace("https://dangotools.com");
+      return;
+    }
+
+    // Ya completó envío antes
+    if (result.completed) {
+      window.location.replace(`/gracias.html?order_id=${encodeURIComponent(orderId)}`);
+      return;
+    }
+
+    // Pedido válido y envío pendiente
+    document.body.classList.add("shipping-ready");
+  } catch (err) {
+    console.error("Order inválido:", err);
+    window.location.replace("https://dangotools.com");
   }
-
-  await redirectIfShippingAlreadyCompleted();
 })();
 
 function clearErrors() {
