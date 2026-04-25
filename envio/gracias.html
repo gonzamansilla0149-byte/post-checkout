@@ -8,7 +8,7 @@
 </head>
 <body>
   <main class="container">
-    <div class="card center">
+    <div class="card center" id="receipt">
       <div class="icon">✓</div>
 
       <h1>¡Gracias por tu compra!</h1>
@@ -16,21 +16,61 @@
         Recibimos correctamente tus datos de envío.
       </p>
 
+      <div class="summary">
+        <h2>Resumen del envío</h2>
+        <div id="summaryContent"></div>
+      </div>
+
       <p class="info">
-        En breve vas a recibir un email con el detalle de tu pedido.
+        Guardá este comprobante como respaldo de tu compra.
       </p>
 
-      <p class="info small">
-        Si tenés alguna duda podés contactarnos respondiendo ese email.
-      </p>
-
+      <button onclick="downloadPDF()">Descargar comprobante PDF</button>
       <button onclick="goHome()">Volver al inicio</button>
     </div>
   </main>
 
   <script>
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get("order_id") || "-";
+    const data = JSON.parse(sessionStorage.getItem("shippingSummary") || "{}");
+
+    const rows = [
+      ["Order ID", orderId],
+      ["Nombre", data.firstName],
+      ["Apellido", data.lastName],
+      ["DNI", data.dni],
+      ["Teléfono", data.phone],
+      ["Dirección", data.address1],
+      ["Piso / Depto", data.address2],
+      ["Ciudad", data.city],
+      ["Provincia", data.province],
+      ["Código postal", data.zip],
+      ["País", data.country],
+      ["Facturación", data.billingOption === "different" ? "Dirección distinta" : "Igual al envío"],
+      ["Dirección de facturación", data.billingAddress],
+      ["Ciudad de facturación", data.billingCity],
+      ["Provincia de facturación", data.billingProvince],
+      ["CP facturación", data.billingPostalCode],
+      ["Notas", data.notes],
+    ];
+
+    document.getElementById("summaryContent").innerHTML = rows
+      .filter(([_, value]) => value)
+      .map(([label, value]) => `
+        <div class="summary-row">
+          <strong>${label}</strong>
+          <span>${String(value)}</span>
+        </div>
+      `)
+      .join("");
+
+    function downloadPDF() {
+      window.print();
+    }
+
     function goHome() {
-      window.location.href = "/";
+      window.location.href = "https://dangotools.com";
     }
   </script>
 </body>
