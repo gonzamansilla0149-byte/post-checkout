@@ -1,77 +1,77 @@
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  const summaryEl = document.getElementById("summaryContent");
-  if (!summaryEl) return;
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gracias por tu compra</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="container">
+    <div class="card center" id="receipt">
+      <div class="icon">✓</div>
 
-  const params = new URLSearchParams(window.location.search);
-  const rawOrderId = params.get("order_id") || "-";
+      <h1>¡Gracias por tu compra!</h1>
+      <p class="subtitle">
+        Recibimos correctamente tus datos de envío.
+      </p>
 
-  let data = {};
-  try {
-    data = JSON.parse(sessionStorage.getItem("shippingSummary") || "{}");
-  } catch (e) {
-    data = {};
-  }
-
-  function cleanOrderId(value) {
-    const str = String(value || "-");
-    const match = str.match(/Order\/(\d+)/i);
-    return match ? match[1] : str.split("/").pop();
-  }
-
-  const now = new Date();
-
-  const orderId = cleanOrderId(rawOrderId);
-  const fullName = [data.firstName, data.lastName].filter(Boolean).join(" ");
-
-  const shippingAddress = [
-    data.address1,
-    data.address2,
-    data.city,
-    data.province,
-    data.zip,
-    data.country
-  ].filter(Boolean).join(", ");
-
-  const billingAddress =
-    data.billingOption === "different"
-      ? [
-          data.billingAddress,
-          data.billingApartment,
-          data.billingCity,
-          data.billingProvince,
-          data.billingPostalCode
-        ].filter(Boolean).join(", ")
-      : "Igual a la dirección de envío";
-
-  const rows = [
-    ["Código de compra", orderId],
-    ["Fecha", now.toLocaleDateString("es-AR")],
-    ["Hora", now.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })],
-    ["Nombre completo", fullName],
-    ["DNI", data.dni],
-    ["Teléfono", data.phone],
-    ["Dirección de envío", shippingAddress],
-    ["Dirección de facturación", billingAddress],
-    ["Notas", data.notes],
-  ];
-
-  summaryEl.innerHTML = rows
-    .filter(([_, value]) => value && value !== "-")
-    .map(([label, value]) => `
-      <div class="summary-row">
-        <strong>${label}</strong>
-        <span>${String(value)}</span>
+      <div class="summary">
+        <h2>Resumen del envío</h2>
+        <div id="summaryContent"></div>
       </div>
-    `)
-    .join("");
-});
 
-function downloadPDF() {
-  window.print();
-}
+      <p class="info">
+        Guardá este comprobante como respaldo de tu compra.
+      </p>
 
-function goHome() {
-  window.location.href = "https://dangotools.com";
-}
-</script>
+      <button onclick="downloadPDF()">Descargar comprobante PDF</button>
+      <button onclick="goHome()">Volver al inicio</button>
+    </div>
+  </main>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get("order_id") || "-";
+    const data = JSON.parse(sessionStorage.getItem("shippingSummary") || "{}");
+
+    const rows = [
+      ["Order ID", orderId],
+      ["Nombre", data.firstName],
+      ["Apellido", data.lastName],
+      ["DNI", data.dni],
+      ["Teléfono", data.phone],
+      ["Dirección", data.address1],
+      ["Piso / Depto", data.address2],
+      ["Ciudad", data.city],
+      ["Provincia", data.province],
+      ["Código postal", data.zip],
+      ["País", data.country],
+      ["Facturación", data.billingOption === "different" ? "Dirección distinta" : "Igual al envío"],
+      ["Dirección de facturación", data.billingAddress],
+      ["Ciudad de facturación", data.billingCity],
+      ["Provincia de facturación", data.billingProvince],
+      ["CP facturación", data.billingPostalCode],
+      ["Notas", data.notes],
+    ];
+
+    document.getElementById("summaryContent").innerHTML = rows
+      .filter(([_, value]) => value)
+      .map(([label, value]) => `
+        <div class="summary-row">
+          <strong>${label}</strong>
+          <span>${String(value)}</span>
+        </div>
+      `)
+      .join("");
+
+    function downloadPDF() {
+      window.print();
+    }
+
+    function goHome() {
+      window.location.href = "https://dangotools.com";
+    }
+  </script>
+</body>
+</html>
