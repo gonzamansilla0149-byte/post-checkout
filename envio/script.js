@@ -148,11 +148,11 @@ function getFormData() {
 function validate(data) {
   let isValid = true;
 
-  if (!data.orderId) {
-    alert("No se encontró el identificador del pedido.");
-    isValid = false;
-  }
-
+if (!data.orderId) {
+  alert("Estamos procesando tu pago. Esperá unos segundos y volvé a intentar.");
+  return false;
+}
+  
   if (!data.firstName) {
     setError("firstName", "Ingresá tu nombre");
     isValid = false;
