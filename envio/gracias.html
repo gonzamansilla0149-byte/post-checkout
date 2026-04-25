@@ -1,7 +1,17 @@
 <script>
+document.addEventListener("DOMContentLoaded", function () {
+  const summaryEl = document.getElementById("summaryContent");
+  if (!summaryEl) return;
+
   const params = new URLSearchParams(window.location.search);
   const rawOrderId = params.get("order_id") || "-";
-  const data = JSON.parse(sessionStorage.getItem("shippingSummary") || "{}");
+
+  let data = {};
+  try {
+    data = JSON.parse(sessionStorage.getItem("shippingSummary") || "{}");
+  } catch (e) {
+    data = {};
+  }
 
   function cleanOrderId(value) {
     const str = String(value || "-");
@@ -9,26 +19,9 @@
     return match ? match[1] : str.split("/").pop();
   }
 
-  function formatDateTime() {
-    const now = new Date();
-
-    return {
-      date: now.toLocaleDateString("es-AR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric"
-      }),
-      time: now.toLocaleTimeString("es-AR", {
-        hour: "2-digit",
-        minute: "2-digit"
-      })
-    };
-  }
-
-  const purchaseDateTime = formatDateTime();
+  const now = new Date();
 
   const orderId = cleanOrderId(rawOrderId);
-
   const fullName = [data.firstName, data.lastName].filter(Boolean).join(" ");
 
   const shippingAddress = [
@@ -53,21 +46,17 @@
 
   const rows = [
     ["Código de compra", orderId],
-    ["Fecha de compra", purchaseDateTime.date],
-    ["Hora de compra", purchaseDateTime.time],
-
+    ["Fecha", now.toLocaleDateString("es-AR")],
+    ["Hora", now.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })],
     ["Nombre completo", fullName],
     ["DNI", data.dni],
     ["Teléfono", data.phone],
-
     ["Dirección de envío", shippingAddress],
-
     ["Dirección de facturación", billingAddress],
-
     ["Notas", data.notes],
   ];
 
-  document.getElementById("summaryContent").innerHTML = rows
+  summaryEl.innerHTML = rows
     .filter(([_, value]) => value && value !== "-")
     .map(([label, value]) => `
       <div class="summary-row">
@@ -76,12 +65,13 @@
       </div>
     `)
     .join("");
+});
 
-  function downloadPDF() {
-    window.print();
-  }
+function downloadPDF() {
+  window.print();
+}
 
-  function goHome() {
-    window.location.href = "https://dangotools.com";
-  }
+function goHome() {
+  window.location.href = "https://dangotools.com";
+}
 </script>
