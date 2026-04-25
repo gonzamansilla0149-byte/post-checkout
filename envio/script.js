@@ -86,7 +86,9 @@ async function redirectIfShippingAlreadyCompleted() {
     }
 
     // Pedido válido y envío pendiente
-    document.body.classList.add("shipping-ready");
+    
+   document.body.classList.add("shipping-ready");
+  document.getElementById("shippingLoader")?.remove();
   } catch (err) {
     console.error("Order inválido:", err);
     window.location.replace("https://dangotools.com");
