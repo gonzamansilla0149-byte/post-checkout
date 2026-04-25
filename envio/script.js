@@ -266,14 +266,7 @@ if (!success) {
 
   console.log("Datos del formulario:", data);
 
-try {
-  const res = await fetch("https://paydangotools.gonzamansilla0149.workers.dev/shipping-completed", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
+
 
   const result = await res.json();
 
