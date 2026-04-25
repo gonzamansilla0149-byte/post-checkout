@@ -269,16 +269,17 @@ form.addEventListener("submit", async (e) => {
         };
       }
 
-      if (response.ok && lastResult.ok) {
-        successMessage.classList.remove("hidden");
+if (response.ok && lastResult.ok) {
+  sessionStorage.setItem("shippingSummary", JSON.stringify(data));
 
-        setTimeout(() => {
-          window.location.href = `/gracias.html?order_id=${encodeURIComponent(orderId)}`;
-        }, 500);
+  successMessage.classList.remove("hidden");
 
-        return;
-      }
+  setTimeout(() => {
+    window.location.href = `/gracias.html?order_id=${encodeURIComponent(orderId)}`;
+  }, 500);
 
+  return;
+}
       if (lastResult.alreadyCompleted) {
         window.location.href = `/gracias.html?order_id=${encodeURIComponent(orderId)}`;
         return;
